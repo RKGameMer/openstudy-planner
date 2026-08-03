@@ -169,10 +169,25 @@ Confirmed on 2026-08-03 for DEV-017 through DEV-029:
   only the existing application-key removal and cannot remove exported files
   or other browser/system copies.
 
+## DEC-016 — GitHub Pages release workflow
+
+Confirmed on 2026-08-03 for DEV-040 and DEV-041:
+
+- `.github/workflows/deploy-pages.yml` is the only deployment workflow.
+- A push to `main` or a manual dispatch runs `npm ci`, `npm run lint`,
+  `npm run test`, and `npm run build` in that order. It uploads and deploys
+  `dist` only after the build job succeeds.
+- The workflow uses the official `actions/checkout`, `actions/setup-node`,
+  `actions/upload-pages-artifact`, and `actions/deploy-pages` actions. It
+  adds no deployment platform, analytics, advertising, tracking script, or
+  task-data upload.
+- The repository owner must enable **GitHub Actions** as the Pages source in
+  repository settings before a first deployment can become public. Vite keeps
+  the `/openstudy-planner/` base path and the application keeps HashRouter.
+
 ## Open decisions
 
 The following decisions remain open:
 
-- backup file extension and schema;
 - supported browser baseline;
 - text field length limits;

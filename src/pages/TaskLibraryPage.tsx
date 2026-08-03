@@ -14,28 +14,48 @@ export function TaskLibraryPage() {
   const [isCreating, setIsCreating] = useState(false)
   const tasks = store.getTasksByFilter(filter)
   const todayIds = new Set(store.getTodayPriority().map((task) => task.id))
-
-  return (
-    <section aria-labelledby="task-library-page-title" className="page-section">
-      <div className="page-heading">
-        <div>
-          <h1 id="task-library-page-title">任务库</h1>
-          <p>集中查看活跃、已完成和已移除的任务。</p>
-        </div>
+  const canCreate = !store.isLoading && store.loadError === null
+  const heading = (
+    <div className="page-heading">
+      <div>
+        <h1 id="task-library-page-title">任务库</h1>
+        <p>集中查看活跃、已完成和已移除的任务。</p>
+      </div>
+      {canCreate && (
         <button className="button" onClick={() => {
           setFormTask(null)
           setIsCreating(true)
         }} type="button">
           新建任务
         </button>
-      </div>
+      )}
+    </div>
+  )
 
-      {store.loadError !== null && (
+  if (store.isLoading) {
+    return (
+      <section aria-labelledby="task-library-page-title" className="page-section">
+        {heading}
+        <div className="empty-state" role="status">正在读取当前浏览器中的任务数据。</div>
+      </section>
+    )
+  }
+
+  if (store.loadError !== null) {
+    return (
+      <section aria-labelledby="task-library-page-title" className="page-section">
+        {heading}
         <div className="inline-error" role="alert">
-          <p>无法读取任务列表。{store.loadError}</p>
+          <p>无法读取任务列表。现有数据不会被自动覆盖。{store.loadError}</p>
           <button className="button button--secondary" onClick={() => store.reload()} type="button">重新加载</button>
         </div>
-      )}
+      </section>
+    )
+  }
+
+  return (
+    <section aria-labelledby="task-library-page-title" className="page-section">
+      {heading}
 
       {(isCreating || formTask !== null) && (
         <TaskForm
@@ -83,7 +103,12 @@ export function TaskLibraryPage() {
           ))}
         </div>
       ) : (
-        <LibraryEmptyState filter={filter} onCreate={() => setIsCreating(true)} onShowActive={() => setFilter('活跃')} />
+        <LibraryEmptyState
+          filter={filter}
+          hasAnyTasks={store.tasks.length > 0}
+          onCreate={() => setIsCreating(true)}
+          onShowActive={() => setFilter('活跃')}
+        />
       )}
     </section>
   )
@@ -91,10 +116,12 @@ export function TaskLibraryPage() {
 
 function LibraryEmptyState({
   filter,
+  hasAnyTasks,
   onCreate,
   onShowActive,
 }: {
   filter: TaskListFilter
+  hasAnyTasks: boolean
   onCreate: () => void
   onShowActive: () => void
 }) {
@@ -107,7 +134,7 @@ function LibraryEmptyState({
     )
   }
 
-  if (filter === '活跃') {
+  if (filter === '活跃' && !hasAnyTasks) {
     return (
       <div className="empty-state">
         <h2>任务库还是空的</h2>

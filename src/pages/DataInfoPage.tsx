@@ -14,11 +14,19 @@ export function DataInfoPage() {
   const feedback = useFeedback()
   const navigate = useNavigate()
   const [preview, setPreview] = useState<ImportPreview | null>(null)
+  const heading = (
+    <div className="page-heading">
+      <div>
+        <h1 id="data-info-page-title">数据与说明</h1>
+        <p>管理当前浏览器中的本地备份，并了解数据边界。</p>
+      </div>
+    </div>
+  )
 
   function exportBackup() {
     const result = store.exportBackup()
     if (!result.ok) {
-      feedback.showError(`备份文件没有生成成功。${result.message}`, exportBackup)
+      feedback.showError(`备份文件没有生成成功。当前应用数据没有变化。${result.message}`, exportBackup)
       return
     }
 
@@ -27,7 +35,7 @@ export function DataInfoPage() {
       feedback.showSuccess('备份文件已生成')
     } catch (error) {
       const message = error instanceof Error ? error.message : '无法生成本地备份文件。'
-      feedback.showError(`备份文件没有生成成功。${message}`, exportBackup)
+      feedback.showError(`备份文件没有生成成功。当前应用数据没有变化。${message}`, exportBackup)
     }
   }
 
@@ -101,14 +109,30 @@ export function DataInfoPage() {
 
   const hasTasks = store.tasks.length > 0
 
+  if (store.isLoading) {
+    return (
+      <section aria-labelledby="data-info-page-title" className="page-section">
+        {heading}
+        <div className="empty-state" role="status">正在读取当前浏览器中的任务数据。</div>
+      </section>
+    )
+  }
+
+  if (store.loadError !== null) {
+    return (
+      <section aria-labelledby="data-info-page-title" className="page-section">
+        {heading}
+        <div className="inline-error" role="alert">
+          <p>无法读取当前浏览器中的任务数据。现有数据不会被自动覆盖。{store.loadError}</p>
+          <button className="button button--secondary" onClick={() => store.reload()} type="button">重新加载</button>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section aria-labelledby="data-info-page-title" className="page-section">
-      <div className="page-heading">
-        <div>
-          <h1 id="data-info-page-title">数据与说明</h1>
-          <p>管理当前浏览器中的本地备份，并了解数据边界。</p>
-        </div>
-      </div>
+      {heading}
 
       <InfoSection title="本地数据">
         <p>学习任务默认保存在当前浏览器中，产品服务器不主动接收任务正文。清除浏览器数据、更换设备或浏览器环境可能导致记录丢失。</p>

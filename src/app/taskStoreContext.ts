@@ -8,6 +8,7 @@ export type TaskOperationResult<T> =
 
 export interface TaskContextValue {
   tasks: Task[]
+  isLoading: boolean
   loadError: string | null
   createTask(input: CreateTaskInput, addToToday: boolean): TaskOperationResult<Task>
   updateTask(id: string, input: UpdateTaskInput): TaskOperationResult<Task>

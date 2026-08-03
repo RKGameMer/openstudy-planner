@@ -74,8 +74,11 @@ Do not claim that tests passed unless they were actually run.
 
 ## Current stage
 
-The product requirements, information architecture, and MVP development tasks have been completed.
+DEV-001 through DEV-041 have been implemented and release-checked for the MVP.
 
-Application code has not yet been initialized.
+The current release-preparation batch includes responsive and page-state fixes,
+focused Vitest/DOM coverage, README and Pages workflow documentation, and the
+final scope/privacy review. DEV-042 and DEV-043 remain out of this batch.
 
-The next step is technical planning, followed by `DEV-001`.
+The next step is a human final review, followed by an intentional commit and
+GitHub Pages configuration when the repository owner is ready to publish.

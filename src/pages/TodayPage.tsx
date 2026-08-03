@@ -15,6 +15,17 @@ export function TodayPage() {
   const [formTask, setFormTask] = useState<Task | null>(null)
   const todayPriority = store.getTodayPriority()
   const pastUnresolved = store.getPastUnresolvedPriorities()
+  const allTasksCompleted =
+    store.tasks.length > 0 && store.tasks.every((task) => task.status === '已完成')
+
+  const heading = (
+    <div className="page-heading">
+      <div>
+        <h1 id="today-page-title">今日</h1>
+        <p>{formatToday()} · 先处理当前最重要的任务。</p>
+      </div>
+    </div>
+  )
 
   function submitQuickCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -49,16 +60,27 @@ export function TodayPage() {
     save()
   }
 
+  if (store.isLoading) {
+    return (
+      <section aria-labelledby="today-page-title" className="page-section">
+        {heading}
+        <div className="empty-state" role="status">正在读取当前浏览器中的任务数据。</div>
+      </section>
+    )
+  }
+
+  if (store.loadError !== null) {
+    return (
+      <section aria-labelledby="today-page-title" className="page-section">
+        {heading}
+        <LoadError message={store.loadError} onRetry={() => store.reload()} />
+      </section>
+    )
+  }
+
   return (
     <section aria-labelledby="today-page-title" className="page-section">
-      <div className="page-heading">
-        <div>
-          <h1 id="today-page-title">今日</h1>
-          <p>{formatToday()} · 先处理当前最重要的任务。</p>
-        </div>
-      </div>
-
-      {store.loadError !== null && <LoadError message={store.loadError} onRetry={() => store.reload()} />}
+      {heading}
 
       <form aria-label="快速新建任务" className="quick-create" onSubmit={submitQuickCreate}>
         <label htmlFor="quick-task-name">快速新建任务</label>
@@ -133,6 +155,12 @@ export function TodayPage() {
           description="先写下一件需要完成的事，只填写任务名称也可以。"
           title="还没有学习任务"
         />
+      ) : allTasksCompleted ? (
+        <EmptyState
+          action={<Link className="button button--secondary" to="/tasks">查看任务库</Link>}
+          description="当前任务已经处理完毕。你可以查看任务库，或按需要创建新的任务。"
+          title="当前重点已经处理完毕"
+        />
       ) : (
         <EmptyState
           action={<Link className="button button--secondary" to="/tasks">从任务库选择</Link>}
@@ -160,7 +188,7 @@ function EmptyState({ action, description, title }: { action?: ReactNode; descri
 function LoadError({ message, onRetry }: { message: string; onRetry: () => unknown }) {
   return (
     <div className="inline-error" role="alert">
-      <p>无法读取当前浏览器中的任务数据。{message}</p>
+      <p>无法读取当前浏览器中的任务数据。现有数据不会被自动覆盖。{message}</p>
       <button className="button button--secondary" onClick={() => onRetry()} type="button">重新加载</button>
     </div>
   )

@@ -29,6 +29,12 @@ class FailingWriteStorage extends InMemoryStorage {
   }
 }
 
+class FailingReadStorage extends InMemoryStorage {
+  getItem(_key: string): string | null {
+    throw new Error('simulated read failure')
+  }
+}
+
 const FIXED_ID = '4f5a1e22-7e29-4eea-987c-d7c5a54d7375'
 const FIXED_TIMESTAMP = '2026-08-03T10:20:30.000Z'
 
@@ -37,6 +43,11 @@ function createStoredTask(name: string, options: { priorityDate?: string | null 
     { name, todayPriorityDate: options.priorityDate ?? null },
     { createId: () => FIXED_ID, now: () => new Date(FIXED_TIMESTAMP) },
   )
+}
+
+function setViewport(width: number): void {
+  Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
+  window.dispatchEvent(new Event('resize'))
 }
 
 describe('application navigation shell', () => {
@@ -133,6 +144,92 @@ describe('application navigation shell', () => {
     expect((input as HTMLInputElement).value).toBe('写入失败任务')
     expect(screen.getAllByRole('alert').some((element) => element.textContent?.includes('任务没有保存成功。'))).toBe(true)
     expect(screen.queryByText('任务已创建并加入今日重点')).toBeNull()
+    expect(screen.queryByText(/无法读取当前浏览器中的任务数据/)).toBeNull()
+  })
+
+  it('does not offer data-changing controls when existing browser data cannot be read', async () => {
+    window.location.hash = '#/'
+    const dataAccess = createTaskDataAccess({ storage: new FailingReadStorage() })
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    expect((await screen.findByRole('alert')).textContent).toContain('现有数据不会被自动覆盖')
+    expect(screen.queryByPlaceholderText('写下下一件需要完成的事')).toBeNull()
+
+    fireEvent.click(screen.getByRole('link', { name: '数据与说明' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('无法读取当前浏览器中的任务数据')
+    expect(screen.queryByLabelText('选择备份文件')).toBeNull()
+
+    fireEvent.click(screen.getByRole('link', { name: '任务库' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('无法读取任务列表')
+    expect(screen.queryByRole('button', { name: '新建任务' })).toBeNull()
+  })
+
+  it('distinguishes all-completed Today state from a task library with no selected priority', async () => {
+    window.location.hash = '#/'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    dataAccess.addTask(createStoredTask('已完成的今日任务', { priorityDate: '2026-08-03' }))
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: '开始' }))
+    fireEvent.click(screen.getByRole('button', { name: '标记完成' }))
+    expect(await screen.findByRole('heading', { name: '当前重点已经处理完毕' })).toBeDefined()
+    expect(screen.getByRole('link', { name: '查看任务库' })).toBeDefined()
+  })
+
+  it('distinguishes an empty task library from an empty active-task filter', async () => {
+    window.location.hash = '#/tasks'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    dataAccess.addTask({ ...createStoredTask('已完成任务'), status: '已完成' as const })
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    expect(await screen.findByRole('heading', { name: '暂无活跃任务' })).toBeDefined()
+    expect(screen.queryByRole('heading', { name: '任务库还是空的' })).toBeNull()
+  })
+
+  it('keeps data actions accurate when there is no data to export or clear', async () => {
+    window.location.hash = '#/data-info'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    const exportButton = await screen.findByRole('button', { name: '导出备份' })
+    expect((exportButton as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('button', { name: '清除本地数据' }) as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getByLabelText('选择备份文件')).toBeDefined()
+  })
+
+  it('explains that an export download failure leaves current data unchanged', async () => {
+    window.location.hash = '#/data-info'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const task = createStoredTask('导出失败后仍保留的任务')
+    dataAccess.addTask(task)
+    const originalCreateObjectUrl = Object.getOwnPropertyDescriptor(URL, 'createObjectURL')
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: () => {
+        throw new Error('模拟下载失败')
+      },
+    })
+
+    try {
+      render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+      fireEvent.click(await screen.findByRole('button', { name: '导出备份' }))
+      expect((await screen.findByRole('alert')).textContent).toContain('备份文件没有生成成功。当前应用数据没有变化。')
+      expect(dataAccess.getTaskById(task.id)).toEqual(task)
+    } finally {
+      if (originalCreateObjectUrl === undefined) {
+        delete (URL as { createObjectURL?: unknown }).createObjectURL
+      } else {
+        Object.defineProperty(URL, 'createObjectURL', originalCreateObjectUrl)
+      }
+    }
   })
 
   it('shows a non-blocking notice for unresolved past priorities without changing the task', async () => {
@@ -210,6 +307,56 @@ describe('application navigation shell', () => {
       expect(screen.getByRole('heading', { name: '今日' })).toBeDefined()
     })
     expect(dataAccess.getTaskById(task.id)).toEqual(task)
+  })
+
+  it.each([360, 1280])('completes the core task-to-replan flow at a %ipx viewport', async (width) => {
+    window.location.hash = '#/'
+    setViewport(width)
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    const input = await screen.findByPlaceholderText('写下下一件需要完成的事')
+    fireEvent.change(input, { target: { value: '响应式核心流程任务' } })
+    fireEvent.click(screen.getByRole('button', { name: '添加' }))
+    fireEvent.click(await screen.findByRole('button', { name: '开始' }))
+    fireEvent.click(screen.getByRole('button', { name: '标记部分完成' }))
+
+    fireEvent.click(await screen.findByRole('link', { name: '从现在重新安排' }))
+    expect(screen.getByRole('button', { name: '今天继续' })).toBeDefined()
+    expect(screen.getByRole('button', { name: '缩小范围' })).toBeDefined()
+    expect(screen.getByRole('button', { name: '拆分任务' })).toBeDefined()
+    expect(screen.getByRole('button', { name: '改到其他日期' })).toBeDefined()
+    expect(screen.getByRole('button', { name: '移回任务库' })).toBeDefined()
+    expect(screen.getByRole('button', { name: '移除任务' })).toBeDefined()
+
+    fireEvent.click(screen.getByRole('button', { name: '移回任务库' }))
+    fireEvent.click(screen.getByRole('button', { name: '查看结果预览' }))
+    fireEvent.click(screen.getByRole('button', { name: '确认保存结果' }))
+
+    await waitFor(() => {
+      expect(dataAccess.getAllTasks()).toEqual([
+        expect.objectContaining({
+          name: '响应式核心流程任务',
+          plannedDate: null,
+          status: '部分完成',
+          todayPriorityDate: null,
+        }),
+      ])
+    })
+  })
+
+  it('renders long task text together with its primary action', async () => {
+    window.location.hash = '#/'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const longName = '数学函数练习'.repeat(80)
+    dataAccess.addTask(createStoredTask(longName, { priorityDate: '2026-08-03' }))
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    expect(await screen.findByRole('button', { name: longName })).toBeDefined()
+    expect(screen.getByRole('button', { name: '开始' })).toBeDefined()
   })
 
   it('cancels an import preview and clear confirmation without changing existing data', async () => {

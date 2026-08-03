@@ -2,7 +2,8 @@
 
 ## Current phase
 
-DEV-017 through DEV-029 replan and local data-management implementation completed.
+DEV-030 through DEV-041 final release-preparation batch completed; awaiting
+human final review and the repository owner's GitHub Pages setting.
 
 ## Completed
 
@@ -61,9 +62,8 @@ DEV-017 through DEV-029 replan and local data-management implementation complete
   filters, priorities, unlimited priority count, transitions, removal and
   restoration, deletion cancellation, storage write failure feedback, past
   priority notices, and the absence of normal-operation network calls.
-- Ran lint, test, and production build checks successfully using the bundled
-  Node runtime and pnpm script runner because `npm` is not on the current
-  PowerShell PATH.
+- Ran lint, test, and production build checks successfully with the bundled
+  Node runtime because `npm` is not on the current PowerShell PATH.
 - Implemented an in-memory replan draft with result preview, six explicit
   user-selected operations, cancellation, skipped-task preservation, and one
   full-snapshot atomic save for all selected changes.
@@ -76,6 +76,29 @@ DEV-017 through DEV-029 replan and local data-management implementation complete
   replan outcomes, validation, cancellation, atomic write failure protection,
   backup validation/replacement, import and clear cancellation, and local-only
   network boundaries.
+- Completed responsive release checks for 360 CSS-pixel mobile and desktop
+  layouts. The mobile navigation, six replan actions, confirmation dialog,
+  long text handling, and form values after a viewport change were checked
+  without adding device-specific features.
+- Corrected release-blocking page states: a failed data read prevents
+  data-changing controls until retry succeeds; normal save failures remain
+  operation feedback and no longer masquerade as read failures; Today now
+  distinguishes an all-completed state; and the library distinguishes a truly
+  empty task library from an empty filter result.
+- Added focused Vitest/DOM coverage for read failure protection, completed and
+  filter empty states, empty data actions, 360/desktop core flows, six visible
+  replan actions, and long task text with its primary action.
+- Rewrote README with the actual MVP scope, local run commands, privacy and
+  backup boundaries, contribution guidance, MIT license, and GitHub Pages
+  setup instructions.
+- Added the minimal GitHub Pages workflow with `npm ci`, lint, test, and build
+  gates before deployment of `dist`; Vite keeps `/openstudy-planner/` and
+  HashRouter remains in use.
+- Completed the DEV-041 source audit: no normal source network interface, no
+  tracked secret/backup file, and no MVP-external feature entry was found.
+- Pre-commit release review removed the inert task-library creation entry while
+  data loading fails, clarified that export-download failure leaves data
+  unchanged, and narrowed GitHub Pages permissions to the deployment job.
 
 ## In progress
 
@@ -83,13 +106,15 @@ DEV-017 through DEV-029 replan and local data-management implementation complete
 
 ## Not started
 
-- Responsive coverage, accessibility review, and deployment.
-- Deployment.
+- DEV-042 and DEV-043 are P1 tasks and were intentionally not implemented in
+  this release batch.
+- GitHub Pages is not yet public: the repository owner must enable GitHub
+  Actions as the Pages source before the first successful workflow deployment.
 
 ## Next action
 
-Plan DEV-030 and DEV-031 only when the product owner authorizes the next
-responsive and page-state coverage batch.
+Complete a human pre-commit review, then enable the GitHub Pages source and
+intentionally commit the release batch when the repository owner is ready.
 
 ## Current constraints
 

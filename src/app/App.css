@@ -61,6 +61,14 @@
   gap: 1rem;
 }
 
+.page-heading > *,
+.section-heading > *,
+.task-card__summary,
+.task-card__actions,
+.inline-error > * {
+  min-width: 0;
+}
+
 .page-heading h1,
 .section-heading h2,
 .task-form-panel h2,
@@ -216,12 +224,22 @@ textarea:focus-visible {
   font-size: 1.05rem;
   font-weight: 800;
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .task-card__meta {
   margin-top: 0.55rem;
   color: #475569;
   font-size: 0.875rem;
+}
+
+.task-card p,
+.replan-task h2,
+.replan-task p,
+.preview-list strong,
+.feedback span,
+.confirmation p {
+  overflow-wrap: anywhere;
 }
 
 .tag {
@@ -467,6 +485,7 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 1rem;
   border-color: #fca5a5;
   background: #fff1f2;
@@ -517,15 +536,19 @@ textarea:focus-visible {
   display: grid;
   padding: 1rem;
   place-items: center;
+  overflow-y: auto;
   background: rgb(15 23 42 / 45%);
 }
 
 .confirmation {
   width: min(100%, 32rem);
+  max-height: calc(100dvh - 2rem);
   padding: 1.5rem;
   border-radius: 0.875rem;
   background: #ffffff;
   box-shadow: 0 1rem 3rem rgb(15 23 42 / 25%);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .confirmation h2,
@@ -536,6 +559,28 @@ textarea:focus-visible {
 .confirmation p {
   color: #475569;
   line-height: 1.6;
+}
+
+@media (max-width: 47.99rem) {
+  .page-heading {
+    flex-direction: column;
+  }
+
+  .quick-create__controls > .button,
+  .task-card__actions > .button,
+  .task-card__more-actions {
+    flex: 1 1 100%;
+  }
+
+  .task-card__more-actions-content {
+    position: static;
+    min-width: 0;
+    margin-top: 0.5rem;
+  }
+
+  .import-preview dl {
+    grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr);
+  }
 }
 
 @media (min-width: 48rem) {

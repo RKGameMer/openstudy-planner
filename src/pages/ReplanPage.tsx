@@ -21,6 +21,15 @@ export function ReplanPage() {
   const candidates = store.getReplanCandidates()
   const [decisions, setDecisions] = useState<Record<string, ReplanDecision | undefined>>({})
   const [preview, setPreview] = useState<ReplanPreview | null>(null)
+  const heading = (
+    <div className="page-heading">
+      <div>
+        <h1 id="replan-page-title">从现在重新安排</h1>
+        <p>根据现在的情况，重新决定每项未完成任务怎么处理。你可以暂时跳过，系统不会自动延期。</p>
+      </div>
+      <button className="button button--secondary" onClick={() => navigate('/')} type="button">返回今日</button>
+    </div>
+  )
 
   function selectAction(task: Task, action: ReplanAction) {
     setPreview(null)
@@ -64,15 +73,30 @@ export function ReplanPage() {
     navigate('/')
   }
 
+  if (store.isLoading) {
+    return (
+      <section aria-labelledby="replan-page-title" className="page-section">
+        {heading}
+        <div className="empty-state" role="status">正在读取当前浏览器中的任务数据。</div>
+      </section>
+    )
+  }
+
+  if (store.loadError !== null) {
+    return (
+      <section aria-labelledby="replan-page-title" className="page-section">
+        {heading}
+        <div className="inline-error" role="alert">
+          <p>无法读取当前浏览器中的任务数据。现有数据不会被自动覆盖。{store.loadError}</p>
+          <button className="button button--secondary" onClick={() => store.reload()} type="button">重新加载</button>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section aria-labelledby="replan-page-title" className="page-section">
-      <div className="page-heading">
-        <div>
-          <h1 id="replan-page-title">从现在重新安排</h1>
-          <p>根据现在的情况，重新决定每项未完成任务怎么处理。你可以暂时跳过，系统不会自动延期。</p>
-        </div>
-        <button className="button button--secondary" onClick={() => navigate('/')} type="button">返回今日</button>
-      </div>
+      {heading}
 
       {candidates.length === 0 ? (
         <div className="empty-state">
