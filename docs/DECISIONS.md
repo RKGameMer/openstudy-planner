@@ -79,6 +79,21 @@ deferred until core-flow testing is needed.
 DEV-001 does not install React Router or Playwright because neither is used by
 the project foundation.
 
+## DEC-011 — Task model serialization conventions
+
+Confirmed on 2026-08-03 for DEV-002:
+
+- Every stored task uses the same `Task` structure, regardless of subject or
+  study format.
+- Unfilled optional task fields are stored as `null`. The creation input may
+  omit them, and the factory normalizes omitted values to `null`.
+- Planned dates and today-priority dates are validated `YYYY-MM-DD` local
+  calendar dates and are not converted to UTC dates.
+- `createdAt` and `updatedAt` use ISO 8601 UTC timestamps from
+  `Date#toISOString()`.
+- Each new task is assigned `dataFormatVersion: 1` by the factory, as required
+  by DEV-002, to give later local-data and backup work an explicit baseline.
+
 ## Open decisions
 
 The following decisions remain open:

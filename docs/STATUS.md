@@ -2,9 +2,7 @@
 
 ## Current phase
 
-DEV-001 project foundation completed.
-
-Preparing DEV-002 task data model implementation.
+DEV-002 task data model implementation completed.
 
 ## Completed
 
@@ -22,6 +20,10 @@ Preparing DEV-002 task data model implementation.
   source directory boundaries, Git ignore rules, and a Vitest smoke test.
 - Configured the Vite GitHub Pages base path as `/openstudy-planner/`.
 - Ran lint, test, and production build checks for DEV-001.
+- Defined the unified `Task` model, constrained subject, study-format, and
+  status enumerations, task factory, and baseline validation in `src/models`.
+- Added DEV-002 unit coverage for task creation, optional fields, enums,
+  duration validation, local dates, and generated timestamps.
 
 ## In progress
 
@@ -29,16 +31,14 @@ Preparing DEV-002 task data model implementation.
 
 ## Not started
 
-- Task data model implementation.
 - Browser storage implementation.
 - User interface implementation.
 - Deployment.
 
 ## Next action
 
-Execute DEV-002 to define the task data model, field validation boundaries, and
-related unit tests. DEV-001 only establishes the project foundation and does
-not implement task data or business behavior.
+Execute DEV-003 to establish the browser-local data access layer. It must use
+the DEV-002 task model and must not add unrelated task business behavior.
 
 ## Current constraints
 
