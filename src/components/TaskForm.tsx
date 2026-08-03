@@ -106,12 +106,13 @@ export function TaskForm({
           <span>任务名称 <strong aria-label="必填">*</strong></span>
           <input
             aria-describedby={fieldErrors.name === undefined ? undefined : 'task-name-error'}
+            aria-invalid={fieldErrors.name !== undefined || undefined}
             autoFocus
             id="task-name"
             onChange={(event) => setValue('name', event.target.value)}
             value={values.name}
           />
-          {fieldErrors.name !== undefined && <small className="field-error" id="task-name-error">{fieldErrors.name}</small>}
+          {fieldErrors.name !== undefined && <small className="field-error" id="task-name-error" role="alert">{fieldErrors.name}</small>}
         </label>
 
         <fieldset className="choice-group">
@@ -158,15 +159,21 @@ export function TaskForm({
           </div>
         </fieldset>
 
-        <button className="text-button" onClick={() => setShowDetails((visible) => !visible)} type="button">
+        <button
+          aria-expanded={showDetails}
+          className="text-button"
+          onClick={() => setShowDetails((visible) => !visible)}
+          type="button"
+        >
           {showDetails ? '收起补充信息' : '补充信息（可选）'}
         </button>
 
         {showDetails && (
           <div className="form-details">
-            <TextField label="内容范围" onChange={(value) => setValue('contentScope', value)} value={values.contentScope} />
-            <TextField label="下一步先做什么" onChange={(value) => setValue('nextStep', value)} value={values.nextStep} />
+            <TextField id="task-content-scope" label="内容范围" onChange={(value) => setValue('contentScope', value)} value={values.contentScope} />
+            <TextField id="task-next-step" label="下一步先做什么" onChange={(value) => setValue('nextStep', value)} value={values.nextStep} />
             <TextField
+              id="task-completion-criteria"
               label="做到什么程度算完成"
               onChange={(value) => setValue('completionCriteria', value)}
               value={values.completionCriteria}
@@ -175,13 +182,14 @@ export function TaskForm({
               <span>计划日期（可选）</span>
               <input id="planned-date" onChange={(event) => setValue('plannedDate', event.target.value)} type="date" value={values.plannedDate} />
             </label>
-            <TextField label="备注" multiline onChange={(value) => setValue('notes', value)} value={values.notes} />
+            <TextField id="task-notes" label="备注" multiline onChange={(value) => setValue('notes', value)} value={values.notes} />
             {isEditing && (
               <>
                 <label className="form-field" htmlFor="actual-duration">
                   <span>实际用时（分钟，可选）</span>
                   <input
                     aria-describedby={fieldErrors.actualDurationMinutes === undefined ? undefined : 'duration-error'}
+                    aria-invalid={fieldErrors.actualDurationMinutes !== undefined || undefined}
                     id="actual-duration"
                     min="1"
                     onChange={(event) => setValue('actualDurationMinutes', event.target.value)}
@@ -189,10 +197,11 @@ export function TaskForm({
                     value={values.actualDurationMinutes}
                   />
                   {fieldErrors.actualDurationMinutes !== undefined && (
-                    <small className="field-error" id="duration-error">{fieldErrors.actualDurationMinutes}</small>
+                    <small className="field-error" id="duration-error" role="alert">{fieldErrors.actualDurationMinutes}</small>
                   )}
                 </label>
                 <TextField
+                  id="task-actual-completion"
                   label="实际完成情况"
                   multiline
                   onChange={(value) => setValue('actualCompletion', value)}
@@ -228,24 +237,25 @@ export function TaskForm({
 }
 
 function TextField({
+  id,
   label,
   multiline = false,
   onChange,
   value,
 }: {
+  id: string
   label: string
   multiline?: boolean
   onChange: (value: string) => void
   value: string
 }) {
-  const id = label === '备注' ? 'task-notes' : undefined
   return (
     <label className="form-field" htmlFor={id}>
       <span>{label}（可选）</span>
       {multiline ? (
         <textarea id={id} onChange={(event) => onChange(event.target.value)} rows={3} value={value} />
       ) : (
-        <input onChange={(event) => onChange(event.target.value)} value={value} />
+        <input id={id} onChange={(event) => onChange(event.target.value)} value={value} />
       )}
     </label>
   )

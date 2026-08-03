@@ -2,8 +2,9 @@
 
 ## Current phase
 
-DEV-030 through DEV-041 final release-preparation batch completed. The MVP is
-deployed to GitHub Pages at https://rkgamemer.github.io/openstudy-planner/.
+DEV-030 through DEV-042 release-preparation and P1 accessibility work is
+completed. The MVP is deployed to GitHub Pages at
+https://rkgamemer.github.io/openstudy-planner/.
 
 ## Completed
 
@@ -102,6 +103,11 @@ deployed to GitHub Pages at https://rkgamemer.github.io/openstudy-planner/.
 - Pre-commit release review removed the inert task-library creation entry while
   data loading fails, clarified that export-download failure leaves data
   unchanged, and narrowed GitHub Pages permissions to the deployment job.
+- Completed DEV-042 basic keyboard and semantic accessibility review: form
+  fields keep visible labels and announced validation errors, task statuses
+  include readable text, and shared confirmation dialogs keep focus within
+  their actions, support Escape, and restore focus to an available trigger
+  after cancellation.
 
 ## In progress
 
@@ -109,8 +115,7 @@ deployed to GitHub Pages at https://rkgamemer.github.io/openstudy-planner/.
 
 ## Not started
 
-- DEV-042 and DEV-043 are P1 tasks and were intentionally not implemented in
-  this release batch.
+- DEV-043 is a P1 task and remains intentionally out of this batch.
 
 ## Next action
 

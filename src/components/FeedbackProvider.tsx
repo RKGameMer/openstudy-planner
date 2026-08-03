@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { FeedbackContext, type ConfirmationRequest, type FeedbackContextValue } from './feedbackContext'
 
 type FeedbackMessage = {
@@ -10,6 +10,26 @@ type FeedbackMessage = {
 export function FeedbackProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState<FeedbackMessage | null>(null)
   const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null)
+  const cancelButtonRef = useRef<HTMLButtonElement | null>(null)
+  const confirmButtonRef = useRef<HTMLButtonElement | null>(null)
+  const confirmationTriggerRef = useRef<HTMLElement | null>(null)
+
+  function closeConfirmation() {
+    setConfirmation(null)
+  }
+
+  useEffect(() => {
+    if (confirmation !== null) {
+      cancelButtonRef.current?.focus()
+      return
+    }
+
+    const trigger = confirmationTriggerRef.current
+    confirmationTriggerRef.current = null
+    if (trigger?.isConnected) {
+      trigger.focus()
+    }
+  }, [confirmation])
 
   const value = useMemo<FeedbackContextValue>(
     () => ({
@@ -20,6 +40,9 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
         setMessage({ kind: 'error', text, retry })
       },
       requestConfirmation(request) {
+        confirmationTriggerRef.current = document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null
         setConfirmation(request)
       },
     }),
@@ -47,21 +70,56 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
         </div>
       )}
       {confirmation !== null && (
-        <div aria-labelledby="confirmation-title" className="confirmation-backdrop" role="presentation">
-          <section aria-describedby="confirmation-description" aria-modal="true" className="confirmation" role="alertdialog">
+        <div className="confirmation-backdrop" role="presentation">
+          <section
+            aria-describedby="confirmation-description"
+            aria-labelledby="confirmation-title"
+            aria-modal="true"
+            className="confirmation"
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                closeConfirmation()
+                return
+              }
+
+              if (event.key === 'Tab') {
+                const cancelButton = cancelButtonRef.current
+                const confirmButton = confirmButtonRef.current
+                if (cancelButton === null || confirmButton === null) {
+                  return
+                }
+
+                if (event.shiftKey && document.activeElement === cancelButton) {
+                  event.preventDefault()
+                  confirmButton.focus()
+                } else if (!event.shiftKey && document.activeElement === confirmButton) {
+                  event.preventDefault()
+                  cancelButton.focus()
+                }
+              }
+            }}
+            role="dialog"
+          >
             <h2 id="confirmation-title">{confirmation.title}</h2>
             <p id="confirmation-description">{confirmation.description}</p>
             <div className="button-row">
-              <button autoFocus className="button button--secondary" onClick={() => setConfirmation(null)} type="button">
+              <button
+                className="button button--secondary"
+                onClick={closeConfirmation}
+                ref={cancelButtonRef}
+                type="button"
+              >
                 {confirmation.cancelLabel ?? '取消'}
               </button>
               <button
                 className={`button${confirmation.danger ? ' button--danger' : ''}`}
                 onClick={() => {
                   const request = confirmation
-                  setConfirmation(null)
+                  closeConfirmation()
                   request.onConfirm()
                 }}
+                ref={confirmButtonRef}
                 type="button"
               >
                 {confirmation.confirmLabel}

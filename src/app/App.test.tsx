@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 import { createTaskDataAccess, type StorageLike } from '../data'
 import { createTask } from '../models'
 import { App } from './App'
@@ -48,6 +49,10 @@ function createStoredTask(name: string, options: { priorityDate?: string | null 
 function setViewport(width: number): void {
   Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
   window.dispatchEvent(new Event('resize'))
+}
+
+function BrokenChild(): never {
+  throw new Error('simulated render failure')
 }
 
 describe('application navigation shell', () => {
@@ -114,7 +119,23 @@ describe('application navigation shell', () => {
     expect(APP_VERSION).toBe('0.1.0')
   })
 
-  it('requires confirmation before permanent deletion and leaves data unchanged after cancellation', async () => {
+  it('announces an unrecoverable rendering error with readable text', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    try {
+      render(
+        <ErrorBoundary>
+          <BrokenChild />
+        </ErrorBoundary>,
+      )
+
+      expect(screen.getByRole('alert').textContent).toContain('请刷新页面后重试')
+    } finally {
+      consoleError.mockRestore()
+    }
+  })
+
+  it('moves focus into confirmation dialogs and restores it after cancellation or Escape', async () => {
     window.location.hash = '#/tasks'
     const storage = new InMemoryStorage()
     const dataAccess = createTaskDataAccess({ storage })
@@ -124,12 +145,66 @@ describe('application navigation shell', () => {
     render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
 
     fireEvent.click(await screen.findByText('更多操作'))
-    fireEvent.click(screen.getByRole('button', { name: '永久删除' }))
-    const dialog = screen.getByRole('alertdialog')
-    fireEvent.click(within(dialog).getByRole('button', { name: '取消' }))
+    const deleteButton = screen.getByRole('button', { name: '永久删除' })
+    deleteButton.focus()
+    fireEvent.click(deleteButton)
+    const dialog = screen.getByRole('dialog', { name: '永久删除这个任务？' })
+
+    const cancelButton = within(dialog).getByRole('button', { name: '取消' })
+    const confirmButton = within(dialog).getByRole('button', { name: '永久删除' })
+    await waitFor(() => {
+      expect(document.activeElement).toBe(cancelButton)
+    })
+    confirmButton.focus()
+    fireEvent.keyDown(confirmButton, { key: 'Tab' })
+    expect(document.activeElement).toBe(cancelButton)
+    fireEvent.keyDown(cancelButton, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(confirmButton)
+    cancelButton.focus()
+    fireEvent.click(cancelButton)
 
     expect(dataAccess.getTaskById(task.id)).not.toBeNull()
-    expect(screen.queryByRole('alertdialog')).toBeNull()
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await waitFor(() => {
+      expect(document.activeElement).toBe(deleteButton)
+    })
+
+    fireEvent.click(deleteButton)
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await waitFor(() => {
+      expect(document.activeElement).toBe(deleteButton)
+    })
+  })
+
+  it('provides visible labels, named controls, and readable error and task-status text', async () => {
+    window.location.hash = '#/'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    dataAccess.addTask(createStoredTask('有文字状态的任务', { priorityDate: '2026-08-03' }))
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    expect(await screen.findByText('状态：待处理')).toBeDefined()
+    expect(screen.getByRole('group', { name: '有文字状态的任务的操作' })).toBeDefined()
+    expect(screen.getByRole('button', { name: '开始' })).toBeDefined()
+    expect(screen.getByRole('textbox', { name: '快速新建任务' })).toBeDefined()
+
+    fireEvent.click(screen.getByRole('button', { name: '添加' }))
+    expect(screen.getByRole('alert').textContent).toContain('请填写任务名称。')
+
+    fireEvent.click(screen.getByRole('link', { name: '任务库' }))
+    expect(await screen.findByRole('group', { name: '按任务状态筛选' })).toBeDefined()
+    fireEvent.click(await screen.findByRole('button', { name: '新建任务' }))
+    expect(screen.getByLabelText(/任务名称/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: '补充信息（可选）' }))
+    expect(screen.getByLabelText(/内容范围/)).toBeDefined()
+    expect(screen.getByLabelText(/下一步先做什么/)).toBeDefined()
+    expect(screen.getByLabelText(/做到什么程度算完成/)).toBeDefined()
+    expect(screen.getByLabelText(/计划日期/)).toBeDefined()
+    expect(screen.getByLabelText(/备注/)).toBeDefined()
+    expect(screen.getByRole('button', { name: '保存' })).toBeDefined()
   })
 
   it('does not show success when a storage write fails and keeps quick-create input', async () => {
@@ -277,6 +352,7 @@ describe('application navigation shell', () => {
 
     fireEvent.click(await screen.findByRole('link', { name: '去处理' }))
     expect(screen.getByRole('heading', { name: '从现在重新安排' })).toBeDefined()
+    expect(screen.getByRole('group', { name: '需要重新安排的任务的重新安排方式' })).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: '确认保存结果' }))
     expect(screen.getAllByRole('alert').some((element) => element.textContent?.includes('请至少为一项任务选择处理方式。'))).toBe(true)
     expect(dataAccess.getTaskById(task.id)).toEqual(task)
@@ -382,7 +458,7 @@ describe('application navigation shell', () => {
     expect(dataAccess.getTaskById(task.id)).toEqual(task)
 
     fireEvent.click(screen.getByRole('button', { name: '清除本地数据' }))
-    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '取消' }))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: '取消' }))
     expect(dataAccess.getTaskById(task.id)).toEqual(task)
   })
 
@@ -413,7 +489,7 @@ describe('application navigation shell', () => {
     fireEvent.change(await screen.findByLabelText('选择备份文件'), { target: { files: [backupFile] } })
     expect(await screen.findByRole('heading', { name: '导入备份预览' })).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: '确认导入' }))
-    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '确认导入' }))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: '确认导入' }))
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: '今日' })).toBeDefined()

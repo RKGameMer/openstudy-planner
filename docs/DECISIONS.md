@@ -185,6 +185,20 @@ Confirmed on 2026-08-03 for DEV-040 and DEV-041:
   repository settings before a first deployment can become public. Vite keeps
   the `/openstudy-planner/` base path and the application keeps HashRouter.
 
+## DEC-017 — Basic confirmation-dialog keyboard behavior
+
+Confirmed on 2026-08-04 for DEV-042:
+
+- A confirmation dialog moves focus to its cancel action when it opens.
+- Pressing Escape cancels an open confirmation dialog.
+- Tab and Shift+Tab keep focus within the dialog's two explicit actions.
+- After a cancellation, focus returns to the still-available triggering control
+  when practical; completed destructive actions do not force focus to a
+  control that has been removed or disabled.
+
+This is shared feedback behavior only. It does not change task, storage, or
+product-flow rules.
+
 ## Open decisions
 
 The following decisions remain open:

@@ -64,14 +64,14 @@ export function TaskCard({ task, isTodayPriority, onEdit }: TaskCardProps) {
         <div className="task-card__meta">
           {task.subject !== null && <span className="tag">{task.subject}</span>}
           {task.studyFormat !== null && <span className="tag">{task.studyFormat}</span>}
-          <span className="tag tag--status">{task.status}</span>
+          <span className="tag tag--status">状态：{task.status}</span>
           {task.plannedDate !== null && <span>计划：{task.plannedDate}</span>}
           {isTodayPriority && <span className="tag tag--priority">今日重点</span>}
         </div>
         {task.nextStep !== null && <p>下一步：{task.nextStep}</p>}
         {task.completionCriteria !== null && <p>完成标准：{task.completionCriteria}</p>}
       </div>
-      <div aria-label={`${task.name}的操作`} className="task-card__actions">
+      <div aria-label={`${task.name}的操作`} className="task-card__actions" role="group">
         {task.status === '待处理' && (
           <button className="button" onClick={() => {
             const start = () => handleResult(store.transitionTask(task.id, '进行中'), '任务已开始', start)

@@ -74,7 +74,7 @@ export function TaskLibraryPage() {
         />
       )}
 
-      <div aria-label="按任务状态筛选" className="filter-row">
+      <div aria-label="按任务状态筛选" className="filter-row" role="group">
         {filters.map((item) => (
           <button
             aria-pressed={filter === item}

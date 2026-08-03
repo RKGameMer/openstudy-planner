@@ -22,8 +22,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <main className="app-layout">
           <section className="app-layout__content">
-            <div className="page-placeholder" aria-labelledby="error-title">
-              <h1 id="error-title">请刷新页面后重试</h1>
+            <div className="page-placeholder" role="alert">
+              <h1>请刷新页面后重试</h1>
               <p>当前基础版本未上传任何任务内容或错误信息。</p>
             </div>
           </section>

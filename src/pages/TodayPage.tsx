@@ -87,6 +87,7 @@ export function TodayPage() {
         <div className="quick-create__controls">
           <input
             aria-describedby={quickError === null ? undefined : 'quick-task-error'}
+            aria-invalid={quickError !== null || undefined}
             id="quick-task-name"
             onChange={(event) => {
               setQuickName(event.target.value)
@@ -97,7 +98,7 @@ export function TodayPage() {
           />
           <button className="button" type="submit">添加</button>
         </div>
-        {quickError !== null && <small className="field-error" id="quick-task-error">{quickError}</small>}
+        {quickError !== null && <small className="field-error" id="quick-task-error" role="alert">{quickError}</small>}
         <div className="quick-create__help">
           <span>保存后加入今日重点</span>
           <button className="text-button" onClick={() => {

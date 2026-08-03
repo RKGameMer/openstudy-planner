@@ -168,7 +168,7 @@ function ReplanTaskEditor({
         <p>{task.status}{task.subject !== null ? ` · ${task.subject}` : ''}{task.studyFormat !== null ? ` · ${task.studyFormat}` : ''}</p>
         {task.completionCriteria !== null && <p>完成标准：{task.completionCriteria}</p>}
       </div>
-      <div aria-label={`${task.name}的重新安排方式`} className="filter-row">
+      <div aria-label={`${task.name}的重新安排方式`} className="filter-row" role="group">
         {(Object.keys(actionLabels) as ReplanAction[]).map((action) => (
           <button
             aria-pressed={decision?.action === action}
