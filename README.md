@@ -25,6 +25,10 @@
 
 也不提供课程、教材或题库正文。
 
+## 在线使用
+
+直接打开 [OpenStudy Planner 在线版](https://rkgamemer.github.io/openstudy-planner/) 即可使用。
+
 ## 本地运行
 
 需要 Node.js 20.19 或更高版本，以及 npm。
@@ -46,11 +50,11 @@ npm run build
 
 ## GitHub Pages 部署
 
+本项目已部署至 GitHub Pages：<https://rkgamemer.github.io/openstudy-planner/>。
+
 仓库包含 GitHub Actions 工作流：推送到 `main` 或手动触发后，依次执行 `npm ci`、lint、test 和 build；全部通过后才部署 `dist` 到 GitHub Pages。
 
-发布地址将是：`https://<GitHub 用户名或组织>.github.io/openstudy-planner/`。当前 README 不把该占位地址当作已上线服务。
-
-首次启用时，请在 GitHub 仓库的 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**，并确认仓库允许 Actions 写入 Pages。Vite 的基础路径固定为 `/openstudy-planner/`，应用使用 HashRouter，因此无需服务器端路由重写。
+如需为分叉仓库或新的部署环境配置 GitHub Pages，请在仓库的 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**，并确认仓库允许 Actions 写入 Pages。Vite 的基础路径固定为 `/openstudy-planner/`，应用使用 HashRouter，因此无需服务器端路由重写。
 
 ## 数据、隐私与安全边界
 

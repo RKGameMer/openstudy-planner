@@ -2,8 +2,8 @@
 
 ## Current phase
 
-DEV-030 through DEV-041 final release-preparation batch completed; awaiting
-human final review and the repository owner's GitHub Pages setting.
+DEV-030 through DEV-041 final release-preparation batch completed. The MVP is
+deployed to GitHub Pages at https://rkgamemer.github.io/openstudy-planner/.
 
 ## Completed
 
@@ -94,6 +94,9 @@ human final review and the repository owner's GitHub Pages setting.
 - Added the minimal GitHub Pages workflow with `npm ci`, lint, test, and build
   gates before deployment of `dist`; Vite keeps `/openstudy-planner/` and
   HashRouter remains in use.
+- Deployed the MVP to GitHub Pages at
+  https://rkgamemer.github.io/openstudy-planner/; the build and deployment
+  jobs completed successfully.
 - Completed the DEV-041 source audit: no normal source network interface, no
   tracked secret/backup file, and no MVP-external feature entry was found.
 - Pre-commit release review removed the inert task-library creation entry while
@@ -108,13 +111,11 @@ human final review and the repository owner's GitHub Pages setting.
 
 - DEV-042 and DEV-043 are P1 tasks and were intentionally not implemented in
   this release batch.
-- GitHub Pages is not yet public: the repository owner must enable GitHub
-  Actions as the Pages source before the first successful workflow deployment.
 
 ## Next action
 
-Complete a human pre-commit review, then enable the GitHub Pages source and
-intentionally commit the release batch when the repository owner is ready.
+Use the deployed version for a human final review. Any later change should be
+reviewed and intentionally committed before deployment.
 
 ## Current constraints
 
