@@ -168,4 +168,139 @@ describe('application navigation shell', () => {
       })
     })
   })
+
+  it('opens replan from past priorities, requires a selected decision, previews it, and saves only after confirmation', async () => {
+    window.location.hash = '#/'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const task = createStoredTask('需要重新安排的任务', { priorityDate: '2026-08-02' })
+    dataAccess.addTask(task)
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    fireEvent.click(await screen.findByRole('link', { name: '去处理' }))
+    expect(screen.getByRole('heading', { name: '从现在重新安排' })).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: '确认保存结果' }))
+    expect(screen.getAllByRole('alert').some((element) => element.textContent?.includes('请至少为一项任务选择处理方式。'))).toBe(true)
+    expect(dataAccess.getTaskById(task.id)).toEqual(task)
+
+    fireEvent.click(screen.getByRole('button', { name: '移除任务' }))
+    fireEvent.click(screen.getByRole('button', { name: '查看结果预览' }))
+    expect(screen.getByText('移入已移除列表，之后仍可恢复。')).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: '确认保存结果' }))
+
+    await waitFor(() => {
+      expect(dataAccess.getTaskById(task.id)).toMatchObject({ status: '已移除', todayPriorityDate: null })
+    })
+  })
+
+  it('cancels replan without writing any draft changes', async () => {
+    window.location.hash = '#/replan'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const task = createStoredTask('取消重新安排的任务', { priorityDate: '2026-08-02' })
+    dataAccess.addTask(task)
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: '移回任务库' }))
+    fireEvent.click(screen.getByRole('button', { name: '取消' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: '今日' })).toBeDefined()
+    })
+    expect(dataAccess.getTaskById(task.id)).toEqual(task)
+  })
+
+  it('cancels an import preview and clear confirmation without changing existing data', async () => {
+    window.location.hash = '#/data-info'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const task = createStoredTask('原有任务')
+    dataAccess.addTask(task)
+    const backupJson = JSON.stringify({
+      backupFormatVersion: 1,
+      exportedAt: FIXED_TIMESTAMP,
+      storageFormatVersion: 1,
+      tasks: [createStoredTask('将被取消的导入任务')],
+    })
+    const backupFile = new File([backupJson], 'backup.json', { type: 'application/json' })
+    Object.defineProperty(backupFile, 'text', { value: async () => backupJson })
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    fireEvent.change(await screen.findByLabelText('选择备份文件'), { target: { files: [backupFile] } })
+    expect(await screen.findByRole('heading', { name: '导入备份预览' })).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: '取消导入' }))
+    expect(dataAccess.getTaskById(task.id)).toEqual(task)
+
+    fireEvent.click(screen.getByRole('button', { name: '清除本地数据' }))
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '取消' }))
+    expect(dataAccess.getTaskById(task.id)).toEqual(task)
+  })
+
+  it('imports a validated preview only after confirmation and then shows the restored data from Today', async () => {
+    window.location.hash = '#/data-info'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const oldTask = createStoredTask('旧任务')
+    const restoredTask = createTask(
+      { name: '恢复的任务', notes: '来自备份' },
+      {
+        createId: () => '7649cd97-6995-4eaf-b55c-686f0fad9a7a',
+        now: () => new Date(FIXED_TIMESTAMP),
+      },
+    )
+    dataAccess.addTask(oldTask)
+    const backupJson = JSON.stringify({
+      backupFormatVersion: 1,
+      exportedAt: FIXED_TIMESTAMP,
+      storageFormatVersion: 1,
+      tasks: [restoredTask],
+    })
+    const backupFile = new File([backupJson], 'restore.json', { type: 'application/json' })
+    Object.defineProperty(backupFile, 'text', { value: async () => backupJson })
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    fireEvent.change(await screen.findByLabelText('选择备份文件'), { target: { files: [backupFile] } })
+    expect(await screen.findByRole('heading', { name: '导入备份预览' })).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: '确认导入' }))
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '确认导入' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: '今日' })).toBeDefined()
+    })
+    expect(dataAccess.getAllTasks()).toEqual([restoredTask])
+  })
+
+  it('clears an older import preview when a newly selected file cannot be read or validated', async () => {
+    window.location.hash = '#/data-info'
+    const storage = new InMemoryStorage()
+    const dataAccess = createTaskDataAccess({ storage })
+    const task = createStoredTask('当前任务')
+    dataAccess.addTask(task)
+    const validJson = JSON.stringify({
+      backupFormatVersion: 1,
+      exportedAt: FIXED_TIMESTAMP,
+      storageFormatVersion: 1,
+      tasks: [createStoredTask('有效备份任务')],
+    })
+    const validFile = new File([validJson], 'valid.json', { type: 'application/json' })
+    Object.defineProperty(validFile, 'text', { value: async () => validJson })
+    const invalidFile = new File(['not-json'], 'invalid.json', { type: 'application/json' })
+    Object.defineProperty(invalidFile, 'text', { value: async () => 'not-json' })
+
+    render(<App dataAccess={dataAccess} getToday={() => '2026-08-03'} />)
+
+    const fileInput = await screen.findByLabelText('选择备份文件')
+    fireEvent.change(fileInput, { target: { files: [validFile] } })
+    expect(await screen.findByRole('heading', { name: '导入备份预览' })).toBeDefined()
+    fireEvent.change(fileInput, { target: { files: [invalidFile] } })
+
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '导入备份预览' })).toBeNull()
+    })
+    expect(dataAccess.getAllTasks()).toEqual([task])
+  })
 })

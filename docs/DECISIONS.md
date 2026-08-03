@@ -150,6 +150,25 @@ Confirmed on 2026-08-03 for DEV-005 through DEV-016:
   Reopening or restoring it does not re-add it automatically; the user chooses
   whether to add it again.
 
+## DEC-015 — Replan draft atomicity and local backup format
+
+Confirmed on 2026-08-03 for DEV-017 through DEV-029:
+
+- Replan selections are an in-memory page draft only. They do not write task
+  data until the user has viewed a result preview and confirms saving. Tasks
+  without a selection remain unchanged.
+- Every selected replan result is built and validated in memory first. The
+  complete resulting task list is written with one existing
+  `replaceAllData` snapshot operation, so a validation or write failure keeps
+  the original snapshot intact.
+- The local backup format is JSON with
+  `{ backupFormatVersion: 1, exportedAt, storageFormatVersion: 1, tasks }`.
+  Import validates the complete backup before the same full-snapshot
+  replacement; it replaces rather than merges current tasks.
+- Export, import, and clear remain local browser operations. Clearing invokes
+  only the existing application-key removal and cannot remove exported files
+  or other browser/system copies.
+
 ## Open decisions
 
 The following decisions remain open:

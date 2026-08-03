@@ -3,9 +3,12 @@ import { createTaskDataAccess, type TaskDataAccess } from '../data'
 import type { Task } from '../models'
 import {
   createTaskService,
+  createDataManagementService,
+  createReplanService,
   filterTasks,
   getCurrentLocalDate,
   getPastUnresolvedPriorityTasks,
+  getReplanCandidates,
   getTodayPriorityTasks,
 } from '../services'
 import { TaskStoreContext, type TaskContextValue, type TaskOperationResult } from './taskStoreContext'
@@ -61,6 +64,18 @@ export function TaskProvider({ children, dataAccess, getToday }: TaskProviderPro
   }
 
   const service = serviceRef.current
+
+  const replanServiceRef = useRef<ReturnType<typeof createReplanService> | null>(null)
+  if (replanServiceRef.current === null) {
+    replanServiceRef.current = createReplanService({ dataAccess: accessRef.current, getToday })
+  }
+  const replanService = replanServiceRef.current
+
+  const dataManagementServiceRef = useRef<ReturnType<typeof createDataManagementService> | null>(null)
+  if (dataManagementServiceRef.current === null) {
+    dataManagementServiceRef.current = createDataManagementService({ dataAccess: accessRef.current })
+  }
+  const dataManagementService = dataManagementServiceRef.current
 
   const fail = useCallback((error: unknown): TaskOperationResult<never> => {
     const message = error instanceof Error ? error.message : '操作没有完成，现有数据保持不变。'
@@ -152,8 +167,52 @@ export function TaskProvider({ children, dataAccess, getToday }: TaskProviderPro
       getPastUnresolvedPriorities() {
         return getPastUnresolvedPriorityTasks(state.tasks, getToday?.() ?? getCurrentLocalDate())
       },
+      getReplanCandidates() {
+        return getReplanCandidates(state.tasks, getToday?.() ?? getCurrentLocalDate())
+      },
+      previewReplan(draft) {
+        try {
+          return { ok: true, value: replanService.preview(draft) }
+        } catch (error) {
+          return fail(error)
+        }
+      },
+      applyReplan(draft) {
+        try {
+          const tasks = replanService.apply(draft)
+          dispatch({ type: 'loaded', tasks })
+          return { ok: true, value: tasks }
+        } catch (error) {
+          return fail(error)
+        }
+      },
+      exportBackup() {
+        try {
+          return { ok: true, value: dataManagementService.exportBackup() }
+        } catch (error) {
+          return fail(error)
+        }
+      },
+      importBackup(backup) {
+        try {
+          const tasks = dataManagementService.importBackup(backup)
+          dispatch({ type: 'loaded', tasks })
+          return { ok: true, value: tasks }
+        } catch (error) {
+          return fail(error)
+        }
+      },
+      clearAppData() {
+        try {
+          dataManagementService.clearAppData()
+          dispatch({ type: 'loaded', tasks: [] })
+          return { ok: true, value: undefined }
+        } catch (error) {
+          return fail(error)
+        }
+      },
     }),
-    [fail, getToday, reload, service, state.loadError, state.tasks],
+    [dataManagementService, fail, getToday, reload, replanService, service, state.loadError, state.tasks],
   )
 
   return <TaskStoreContext.Provider value={value}>{children}</TaskStoreContext.Provider>

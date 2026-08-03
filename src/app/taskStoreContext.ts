@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { CreateTaskInput, Task, TaskStatus } from '../models'
-import type { TaskListFilter, UpdateTaskInput } from '../services'
+import type { ReplanDraft, ReplanPreview, TaskBackup, TaskListFilter, UpdateTaskInput } from '../services'
 
 export type TaskOperationResult<T> =
   | { ok: true; value: T }
@@ -19,6 +19,12 @@ export interface TaskContextValue {
   getTasksByFilter(filter: TaskListFilter): Task[]
   getTodayPriority(): Task[]
   getPastUnresolvedPriorities(): Task[]
+  getReplanCandidates(): Task[]
+  previewReplan(draft: ReplanDraft): TaskOperationResult<ReplanPreview>
+  applyReplan(draft: ReplanDraft): TaskOperationResult<Task[]>
+  exportBackup(): TaskOperationResult<TaskBackup>
+  importBackup(backup: TaskBackup): TaskOperationResult<Task[]>
+  clearAppData(): TaskOperationResult<void>
 }
 
 export const TaskStoreContext = createContext<TaskContextValue | null>(null)

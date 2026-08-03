@@ -2,7 +2,7 @@
 
 ## Current phase
 
-DEV-005 through DEV-016 base task-management closed loop implementation completed within the approved batch scope.
+DEV-017 through DEV-029 replan and local data-management implementation completed.
 
 ## Completed
 
@@ -64,6 +64,18 @@ DEV-005 through DEV-016 base task-management closed loop implementation complete
 - Ran lint, test, and production build checks successfully using the bundled
   Node runtime and pnpm script runner because `npm` is not on the current
   PowerShell PATH.
+- Implemented an in-memory replan draft with result preview, six explicit
+  user-selected operations, cancellation, skipped-task preservation, and one
+  full-snapshot atomic save for all selected changes.
+- Added the secondary replan route and Today-page entries for current and
+  unresolved past priorities without adding a new primary navigation item.
+- Implemented versioned JSON backup export, safe import parsing and preview,
+  confirmed full replacement without merging, application-key-only data
+  clearing, and the data/privacy/copyright information page.
+- Added DEV-034, DEV-035, and DEV-038-focused unit and DOM coverage for six
+  replan outcomes, validation, cancellation, atomic write failure protection,
+  backup validation/replacement, import and clear cancellation, and local-only
+  network boundaries.
 
 ## In progress
 
@@ -71,16 +83,13 @@ DEV-005 through DEV-016 base task-management closed loop implementation complete
 
 ## Not started
 
-- From-now replan, data management, responsive coverage, accessibility review,
-  and deployment.
+- Responsive coverage, accessibility review, and deployment.
 - Deployment.
 
 ## Next action
 
-Plan DEV-017 only after the product owner explicitly authorizes the from-now
-replan flow. The DEV-016 past-priority notice intentionally does not expose a
-replan route in this batch because DEV-017 and later replan operations were
-explicitly excluded from its approved scope.
+Plan DEV-030 and DEV-031 only when the product owner authorizes the next
+responsive and page-state coverage batch.
 
 ## Current constraints
 

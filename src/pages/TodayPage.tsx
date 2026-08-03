@@ -108,6 +108,7 @@ export function TodayPage() {
         <aside className="past-priority-notice">
           <strong>有 {pastUnresolved.length} 项过往重点仍未处理</strong>
           <p>这些任务保持原状态和原重点日期，不会自动加入今天或延期。</p>
+          <Link className="button button--secondary" to="/replan">去处理</Link>
         </aside>
       )}
 
@@ -138,6 +139,9 @@ export function TodayPage() {
           description="你可以从任务库选择任务，或直接创建一个新任务。"
           title="今天还没有选择重点"
         />
+      )}
+      {todayPriority.length > 0 && (
+        <Link className="button button--secondary" to="/replan">从现在重新安排</Link>
       )}
     </section>
   )

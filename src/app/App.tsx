@@ -4,6 +4,7 @@ import { FeedbackProvider } from '../components/FeedbackProvider'
 import { DataInfoPage } from '../pages/DataInfoPage'
 import { TaskLibraryPage } from '../pages/TaskLibraryPage'
 import { TodayPage } from '../pages/TodayPage'
+import { ReplanPage } from '../pages/ReplanPage'
 import type { TaskDataAccess } from '../data'
 import { TaskProvider } from './TaskContext'
 import './App.css'
@@ -18,6 +19,7 @@ export function App({ dataAccess, getToday }: { dataAccess?: TaskDataAccess; get
               <Route index element={<TodayPage />} />
               <Route path="tasks" element={<TaskLibraryPage />} />
               <Route path="data-info" element={<DataInfoPage />} />
+              <Route path="replan" element={<ReplanPage />} />
             </Route>
             <Route path="*" element={<Navigate replace to="/" />} />
           </Routes>

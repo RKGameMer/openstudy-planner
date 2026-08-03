@@ -52,7 +52,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
             <h2 id="confirmation-title">{confirmation.title}</h2>
             <p id="confirmation-description">{confirmation.description}</p>
             <div className="button-row">
-              <button className="button button--secondary" onClick={() => setConfirmation(null)} type="button">
+              <button autoFocus className="button button--secondary" onClick={() => setConfirmation(null)} type="button">
                 {confirmation.cancelLabel ?? '取消'}
               </button>
               <button
