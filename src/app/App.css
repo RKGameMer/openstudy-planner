@@ -1,0 +1,39 @@
+.app-shell {
+  display: grid;
+  min-height: 100vh;
+  padding: 1.5rem;
+  place-items: center;
+}
+
+.app-placeholder {
+  width: min(100%, 42rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid #cbd5e1;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 0.75rem 2.5rem rgb(15 23 42 / 8%);
+}
+
+.app-placeholder h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1.1;
+}
+
+.app-placeholder p {
+  color: #334155;
+  line-height: 1.65;
+}
+
+.app-placeholder__eyebrow {
+  margin: 0 0 0.75rem;
+  color: #0f766e !important;
+  font-weight: 700;
+}
+
+.app-placeholder__version {
+  margin-bottom: 0;
+  color: #64748b !important;
+  font-size: 0.875rem;
+}

@@ -2,9 +2,9 @@
 
 ## Current phase
 
-Repository documentation completed.
+DEV-001 project foundation completed.
 
-Preparing technical planning and project initialization.
+Preparing DEV-002 task data model implementation.
 
 ## Completed
 
@@ -15,27 +15,30 @@ Preparing technical planning and project initialization.
 - Added the MVP development task list.
 - Completed the first documentation consistency review.
 - Prepared repository instructions, initial decisions, and project status files.
+- Confirmed the MVP technical foundation: React, TypeScript, Vite, npm, native
+  CSS, Vitest, and GitHub Pages as the deployment target.
+- Initialized the React + TypeScript + Vite project foundation.
+- Added the application entry point, placeholder page, base error boundary,
+  source directory boundaries, Git ignore rules, and a Vitest smoke test.
+- Configured the Vite GitHub Pages base path as `/openstudy-planner/`.
+- Ran lint, test, and production build checks for DEV-001.
 
 ## In progress
 
-- Uploading `AGENTS.md`, `docs/DECISIONS.md`, and `docs/STATUS.md`.
-- Preparing the first Codex technical-planning task.
+- No implementation task is currently in progress.
 
 ## Not started
 
-- Frontend technology selection.
-- Application project initialization.
 - Task data model implementation.
 - Browser storage implementation.
 - User interface implementation.
-- Automated tests.
 - Deployment.
 
 ## Next action
 
-Ask Codex to inspect the repository documentation and propose the minimum technical implementation plan.
-
-Codex must not initialize the project, install dependencies, modify files, or write business code during that task.
+Execute DEV-002 to define the task data model, field validation boundaries, and
+related unit tests. DEV-001 only establishes the project foundation and does
+not implement task data or business behavior.
 
 ## Current constraints
 

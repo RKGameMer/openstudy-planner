@@ -60,14 +60,29 @@ The MVP does not provide a separate read-only mode.
 
 The project uses the MIT License.
 
+## DEC-010 — MVP technical foundation
+
+Confirmed on 2026-08-03 for the first MVP implementation:
+
+- React with TypeScript and Vite;
+- npm for dependency management;
+- native CSS for styling;
+- Vitest as the baseline test runner;
+- GitHub Pages as the deployment target, with Vite configured for the
+  `/openstudy-planner/` repository subpath.
+
+HashRouter will be added when page navigation is implemented. Application state
+will use `useReducer` with Context when state management is introduced. Browser
+data will use `localStorage` when data access is introduced. Playwright is
+deferred until core-flow testing is needed.
+
+DEV-001 does not install React Router or Playwright because neither is used by
+the project foundation.
+
 ## Open decisions
 
-The following decisions will be made during technical planning:
+The following decisions remain open:
 
-- frontend framework and language;
-- local storage implementation;
 - backup file extension and schema;
 - supported browser baseline;
 - text field length limits;
-- testing tools;
-- deployment method.
