@@ -2,7 +2,7 @@
 
 ## Current phase
 
-DEV-002 task data model implementation completed.
+DEV-003 browser-local data access layer implementation completed.
 
 ## Completed
 
@@ -24,6 +24,20 @@ DEV-002 task data model implementation completed.
   status enumerations, task factory, and baseline validation in `src/models`.
 - Added DEV-002 unit coverage for task creation, optional fields, enums,
   duration validation, local dates, and generated timestamps.
+- Added a browser `localStorage` data access layer with an injectable storage
+  dependency for tests, one complete application snapshot, safe parsing, and
+  DEV-002 `Task` validation.
+- Added task read, add, update, permanent delete, complete replacement,
+  application-only clear, and storage format version interfaces.
+- Added explicit errors and failure protection for unavailable storage, read
+  failures, corrupted data, incompatible versions, invalid tasks, duplicate
+  IDs, quota exhaustion, and failed writes.
+- Added DEV-003 unit coverage for local persistence, complete replacement,
+  data corruption, write-failure preservation, application-key-only clearing,
+  and absence of network interface calls during normal data operations.
+- Ran the configured lint, test, and production-build scripts successfully
+  with the bundled Node runtime because `npm` is not available on the current
+  PowerShell PATH.
 
 ## In progress
 
@@ -31,14 +45,14 @@ DEV-002 task data model implementation completed.
 
 ## Not started
 
-- Browser storage implementation.
 - User interface implementation.
 - Deployment.
 
 ## Next action
 
-Execute DEV-003 to establish the browser-local data access layer. It must use
-the DEV-002 task model and must not add unrelated task business behavior.
+Execute DEV-004 to establish the three-page navigation shell. It must not
+implement task business rules, page business content, or data-management UI
+beyond that task's scope.
 
 ## Current constraints
 

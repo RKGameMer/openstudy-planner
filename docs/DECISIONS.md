@@ -94,6 +94,29 @@ Confirmed on 2026-08-03 for DEV-002:
 - Each new task is assigned `dataFormatVersion: 1` by the factory, as required
   by DEV-002, to give later local-data and backup work an explicit baseline.
 
+## DEC-012 — Browser storage snapshot and failure handling
+
+Confirmed on 2026-08-03 for DEV-003:
+
+- All application task data uses the single, stable browser `localStorage` key
+  `openstudy-planner.app-data`.
+- Its complete stored snapshot is
+  `{ storageFormatVersion: 1, tasks: Task[] }`. The snapshot format version is
+  independent from each task's `dataFormatVersion`; every task must still pass
+  the DEV-002 `isTask` validation.
+- Every add, update, delete, and full replacement builds, validates, and
+  serializes one complete next snapshot before the one final `setItem` call.
+  The application never clears the existing key before attempting a write.
+- Invalid JSON, an invalid snapshot structure, or invalid stored task data is
+  rejected as corrupted data. A different `storageFormatVersion` is rejected
+  as incompatible. Invalid input tasks, duplicate IDs, missing update targets,
+  unavailable storage, read failures, quota exhaustion, and other write
+  failures each have distinct data-access errors.
+- A full replacement validates every task and all IDs before writing. It does
+  not merge with existing tasks, and any failure preserves the existing
+  snapshot. Clearing data calls `removeItem` only for the application key; it
+  never calls `localStorage.clear()`.
+
 ## Open decisions
 
 The following decisions remain open:
