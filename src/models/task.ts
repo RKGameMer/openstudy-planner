@@ -39,6 +39,12 @@ export interface Task {
   completionCriteria: string | null
   plannedDate: LocalDate | null
   todayPriorityDate: LocalDate | null
+  /**
+   * Records the moment a task was most recently added to today's priorities.
+   * Older v1 snapshots may omit this field; the business layer falls back to
+   * their persisted task order until they are next updated.
+   */
+  todayPriorityAddedAt?: IsoTimestamp | null
   status: TaskStatus
   notes: string | null
   actualDurationMinutes: number | null
@@ -56,6 +62,7 @@ export interface CreateTaskInput {
   completionCriteria?: string | null
   plannedDate?: LocalDate | null
   todayPriorityDate?: LocalDate | null
+  todayPriorityAddedAt?: IsoTimestamp | null
   notes?: string | null
   actualDurationMinutes?: number | null
   actualCompletion?: string | null
@@ -147,6 +154,7 @@ export function isTask(value: unknown): value is Task {
     isNullable(value.completionCriteria, isString) &&
     isNullable(value.plannedDate, isValidLocalDate) &&
     isNullable(value.todayPriorityDate, isValidLocalDate) &&
+    isOptionalNullable(value.todayPriorityAddedAt, isIsoTimestamp) &&
     isTaskStatus(value.status) &&
     isNullable(value.notes, isString) &&
     isNullable(value.actualDurationMinutes, isPositiveIntegerMinutes) &&
@@ -162,6 +170,7 @@ export function createTask(input: CreateTaskInput, dependencies: CreateTaskDepen
   const studyFormat = input.studyFormat ?? null
   const plannedDate = input.plannedDate ?? null
   const todayPriorityDate = input.todayPriorityDate ?? null
+  const todayPriorityAddedAt = input.todayPriorityAddedAt ?? null
   const actualDurationMinutes = input.actualDurationMinutes ?? null
 
   assertNullableEnum(subject, isTaskSubject, 'subject', '科目必须是规定选项或为空。')
@@ -172,6 +181,12 @@ export function createTask(input: CreateTaskInput, dependencies: CreateTaskDepen
     isValidLocalDate,
     'todayPriorityDate',
     '今日重点日期必须是有效的 YYYY-MM-DD 日期。',
+  )
+  assertNullableEnum(
+    todayPriorityAddedAt,
+    isIsoTimestamp,
+    'todayPriorityAddedAt',
+    '今日重点加入时间必须是有效的 ISO 时间戳或为空。',
   )
   assertNullableEnum(
     actualDurationMinutes,
@@ -198,6 +213,7 @@ export function createTask(input: CreateTaskInput, dependencies: CreateTaskDepen
     completionCriteria: normalizeOptionalText(input.completionCriteria),
     plannedDate,
     todayPriorityDate,
+    todayPriorityAddedAt: todayPriorityDate === null ? null : (todayPriorityAddedAt ?? timestamp),
     status: '待处理',
     notes: normalizeOptionalText(input.notes),
     actualDurationMinutes,
@@ -257,4 +273,11 @@ function isString(value: unknown): value is string {
 
 function isNullable<T>(value: unknown, guard: (candidate: unknown) => candidate is T): value is T | null {
   return value === null || guard(value)
+}
+
+function isOptionalNullable<T>(
+  value: unknown,
+  guard: (candidate: unknown) => candidate is T,
+): value is T | null | undefined {
+  return value === undefined || isNullable(value, guard)
 }

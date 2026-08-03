@@ -131,6 +131,25 @@ Confirmed on 2026-08-03 for DEV-004:
 - Unknown hash routes redirect safely to 今日. Task, storage, export, import,
   and other business functionality remain outside this navigation-shell task.
 
+## DEC-014 — Base task-management write boundary and priority ordering
+
+Confirmed on 2026-08-03 for DEV-005 through DEV-016:
+
+- React pages and reusable components access task writes only through the
+  task business service. The service is the single caller of the existing
+  localStorage data-access layer for create, update, state change, priority,
+  removal, restoration, and permanent deletion operations.
+- Application state uses a `useReducer` and Context provider. It mirrors
+  successfully persisted tasks only; a failed write leaves the current state
+  and the form input unchanged and must not produce a success message.
+- `todayPriorityAddedAt` is an optional per-task timestamp used solely to
+  display a day's priorities in the order they were added. It remains optional
+  for compatibility with existing v1 snapshots, whose persisted task order is
+  used as a fallback until they are updated.
+- Changing a task to 已完成 or 已移除 clears its today-priority membership.
+  Reopening or restoring it does not re-add it automatically; the user chooses
+  whether to add it again.
+
 ## Open decisions
 
 The following decisions remain open:

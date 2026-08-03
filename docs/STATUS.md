@@ -2,7 +2,7 @@
 
 ## Current phase
 
-DEV-004 primary page shell and navigation implementation completed.
+DEV-005 through DEV-016 base task-management closed loop implementation completed within the approved batch scope.
 
 ## Completed
 
@@ -45,6 +45,25 @@ DEV-004 primary page shell and navigation implementation completed.
   and an unknown-route redirect back to 今日.
 - Added DOM-based navigation coverage for the default route, all three entry
   names, current-page state, invalid routes, and hash parsing after remount.
+- Added a shared feedback provider for non-blocking success and failure
+  messages, retry actions, field errors, and confirmation dialogs.
+- Added a task business-service layer and `useReducer` + Context application
+  state. All task writes use the existing localStorage data-access layer.
+- Implemented optional subject and study-format quick selection, task creation,
+  editing, persistence, task-library status filters, and explicit empty states.
+- Implemented today-priority add/remove rules, non-blocking 1—3 item guidance,
+  insertion-order display, legal task-status transitions, removal/restoration,
+  and confirmed permanent deletion.
+- Implemented the Today core task list, quick creation with opt-out of the
+  default priority membership in the full form, execution actions, and the
+  non-blocking count notice for unresolved past priorities.
+- Added focused business and component tests for task persistence, validation,
+  filters, priorities, unlimited priority count, transitions, removal and
+  restoration, deletion cancellation, storage write failure feedback, past
+  priority notices, and the absence of normal-operation network calls.
+- Ran lint, test, and production build checks successfully using the bundled
+  Node runtime and pnpm script runner because `npm` is not on the current
+  PowerShell PATH.
 
 ## In progress
 
@@ -52,15 +71,16 @@ DEV-004 primary page shell and navigation implementation completed.
 
 ## Not started
 
-- Task creation, task lists, filtering, state operations, data management, and
-  all other page business functionality.
+- From-now replan, data management, responsive coverage, accessibility review,
+  and deployment.
 - Deployment.
 
 ## Next action
 
-Execute DEV-005 to establish the shared feedback and confirmation mechanism.
-It must not implement task business rules or connect the DEV-003 data access
-layer to pages.
+Plan DEV-017 only after the product owner explicitly authorizes the from-now
+replan flow. The DEV-016 past-priority notice intentionally does not expose a
+replan route in this batch because DEV-017 and later replan operations were
+explicitly excluded from its approved scope.
 
 ## Current constraints
 
