@@ -66,9 +66,11 @@ npm run build
 
 ## 贡献
 
-欢迎提交与 MVP 范围一致的 issue 或 pull request。开始前请阅读 [AGENTS.md](AGENTS.md) 与产品文档，并在提交前运行 lint、test 和 build。
+欢迎提交与 MVP 范围一致的 issue 或 pull request。请先阅读 [贡献指南](CONTRIBUTING.md)，其中包含 Bug、可用性/文档建议、本地运行和验证要求。
 
-请勿提交真实用户任务、导出备份、API Key、密码、凭据或其他敏感数据。示例和测试仅使用虚构信息。
+- 安全问题请阅读 [安全政策](SECURITY.md)，并不要在公开提交中附带真实用户数据或敏感材料。
+- 已发布功能记录见 [更新日志](CHANGELOG.md)。
+- 请勿提交真实用户任务、导出备份、API Key、密码、凭据或其他敏感数据；示例和测试仅使用虚构信息。
 
 ## 许可证
 

@@ -1,0 +1,42 @@
+name: 可用性反馈
+description: 反馈难以理解、难以完成的操作，或提出文档改进建议。
+title: "[Feedback]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请只提供理解问题所必需的信息。不要提交诊断、健康信息或不必要的个人信息，也不要附上真实任务、导出备份、密钥或凭据。
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景
+      description: 你当时想完成什么学习规划操作？请使用虚构示例。
+      placeholder: 例如：我想把一项复习任务加入今日重点。
+    validations:
+      required: true
+  - type: textarea
+    id: difficulty
+    attributes:
+      label: 难以理解或无法完成的操作
+      description: 哪个页面、文字或操作让你无法继续？
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: 期望改进
+      description: 你希望界面或文档如何帮助你完成这一步？
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 使用环境
+      description: 请选择当时使用的环境；无需提供诊断或个人信息。
+      options:
+        - 手机
+        - 桌面设备
+        - 手机和桌面设备
+        - 其他环境
+    validations:
+      required: true
