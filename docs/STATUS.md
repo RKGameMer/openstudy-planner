@@ -2,7 +2,7 @@
 
 ## Current phase
 
-DEV-003 browser-local data access layer implementation completed.
+DEV-004 primary page shell and navigation implementation completed.
 
 ## Completed
 
@@ -38,6 +38,13 @@ DEV-003 browser-local data access layer implementation completed.
 - Ran the configured lint, test, and production-build scripts successfully
   with the bundled Node runtime because `npm` is not available on the current
   PowerShell PATH.
+- Added the three confirmed first-level pages: 今日, 任务库, and 数据与说明.
+- Added a shared responsive application layout with text-labelled primary
+  navigation and a clear current-page state.
+- Added HashRouter routes for GitHub Pages compatibility, a 今日 default route,
+  and an unknown-route redirect back to 今日.
+- Added DOM-based navigation coverage for the default route, all three entry
+  names, current-page state, invalid routes, and hash parsing after remount.
 
 ## In progress
 
@@ -45,14 +52,15 @@ DEV-003 browser-local data access layer implementation completed.
 
 ## Not started
 
-- User interface implementation.
+- Task creation, task lists, filtering, state operations, data management, and
+  all other page business functionality.
 - Deployment.
 
 ## Next action
 
-Execute DEV-004 to establish the three-page navigation shell. It must not
-implement task business rules, page business content, or data-management UI
-beyond that task's scope.
+Execute DEV-005 to establish the shared feedback and confirmation mechanism.
+It must not implement task business rules or connect the DEV-003 data access
+layer to pages.
 
 ## Current constraints
 

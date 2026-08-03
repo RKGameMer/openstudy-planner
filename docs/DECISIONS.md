@@ -117,6 +117,20 @@ Confirmed on 2026-08-03 for DEV-003:
   snapshot. Clearing data calls `removeItem` only for the application key; it
   never calls `localStorage.clear()`.
 
+## DEC-013 — Primary navigation and hash routing
+
+Confirmed on 2026-08-03 for DEV-004:
+
+- The application uses `HashRouter`, not `BrowserRouter`, so routes remain
+  compatible with GitHub Pages under the `/openstudy-planner/` Vite base path.
+- The only first-level routes are `#/` (今日), `#/tasks` (任务库), and
+  `#/data-info` (数据与说明). The default route is 今日.
+- The shared application layout provides the same three text-labelled primary
+  navigation links on mobile and desktop. `NavLink` supplies the current-page
+  selection state.
+- Unknown hash routes redirect safely to 今日. Task, storage, export, import,
+  and other business functionality remain outside this navigation-shell task.
+
 ## Open decisions
 
 The following decisions remain open:
