@@ -283,6 +283,12 @@ textarea:focus-visible {
   display: none;
 }
 
+.task-card__more-actions summary:focus-visible,
+.feedback__close:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
 .task-card__more-actions-content {
   position: absolute;
   z-index: 2;
